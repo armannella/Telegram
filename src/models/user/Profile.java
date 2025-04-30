@@ -1,6 +1,7 @@
 package models.user;
 
 import java.util.ArrayList;
+import manager.Finder;
 
 public class Profile {
 
@@ -38,13 +39,7 @@ public class Profile {
 
     public Post getPostbyID (int id)
     {
-        for (Post post : posts)
-        {
-            if(post.getID() == id)
-            {
-                return post ;
-            }
-        }
-        return null ;
+        Finder<Post> finder = new Finder<>();
+        return finder.findByID(posts, id);
     }
 }

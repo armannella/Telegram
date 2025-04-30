@@ -1,10 +1,12 @@
 package models.chat;
 
 import java.util.ArrayList;
+import manager.Finder;
+import models.Identifiable;
 import models.message.Message;
 import models.user.User;
 
-public abstract class Chat {
+public abstract class Chat implements Identifiable{
     private static int counter = 1 ;
     private int id ;
     private ArrayList<ChatMember> members = new ArrayList<>();
@@ -64,6 +66,7 @@ public abstract class Chat {
         messages.remove(message);
     }
 
+    @Override
     public int getID()
     {
         return this.id;
@@ -82,12 +85,10 @@ public abstract class Chat {
     }
 
     public Message findMessageById(int id) {
-        for (Message msg : messages) {
-            if (msg.getID() == id) {
-                return msg;
-            }
-        }
-        return null;
+
+        Finder<Message> finder = new Finder<>();
+        return finder.findByID(messages, id);
+        
     }
 
     public Role getRoleofUser(User user) {

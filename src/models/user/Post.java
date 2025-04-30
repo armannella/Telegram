@@ -2,9 +2,10 @@ package models.user;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import models.Identifiable;
 import util.DateTimeUtil;
 
-public class Post {
+public class Post implements Identifiable{
     private static int counter = 1;
     private int id ;
     private String caption ;
@@ -73,6 +74,7 @@ public class Post {
         return likes ;
     }
 
+    @Override
     public int getID()
     {
         return this.id;

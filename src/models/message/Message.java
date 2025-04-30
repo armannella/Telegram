@@ -1,8 +1,9 @@
 package models.message;
 import java.time.LocalDateTime;
+import models.Identifiable;
 import models.user.*;
 
-public abstract class Message {
+public abstract class Message implements Identifiable{
     protected  User sender ;
     protected LocalDateTime timestamp ;
     protected static int counter = 1 ;
@@ -27,6 +28,7 @@ public abstract class Message {
         return this.timestamp;
     }
     
+    @Override
     public int getID()
     {
         return this.id ;

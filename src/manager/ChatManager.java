@@ -55,14 +55,8 @@ public class ChatManager {
     
     public Chat getChatById(int id)
     {
-        for (Chat chat : chats)
-        {
-            if(chat.getID() == id)
-            {
-                return chat ;
-            }
-        }
-        return null ;
+        Finder<Chat> finder = new Finder<>();
+        return finder.findByID(chats, id);
     }
 
 
