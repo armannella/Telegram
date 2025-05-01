@@ -15,4 +15,8 @@ public class Group extends Chat{
         return "Group" ;
     }
 
+    @Override
+    public Role getDefaultJoinRole() {
+        return new NormalUser(); 
+    }
 }

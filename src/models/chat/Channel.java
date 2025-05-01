@@ -16,5 +16,8 @@ public class Channel extends Chat{
         return "Channel" ;
     }
 
-
+    @Override
+    public Role getDefaultJoinRole() {
+        return new Viewer(); 
+    }
 }

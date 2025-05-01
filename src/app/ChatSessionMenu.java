@@ -1,7 +1,8 @@
 package app;
 
 import models.chat.Chat;
-import models.chat.Role;
+import models.exception.IdNotFoundException;
+import models.exception.NoPermissionException;
 import models.message.Message;
 import models.message.MultimediaMessage;
 import models.message.TextMessage;
@@ -24,7 +25,7 @@ public class ChatSessionMenu {
             Console.printSeparator();
             MainApp.messageManager.displayChatMessages(chat);
             Console.printSeparator();
-            System.out.println("\nOptions:");
+            System.out.println("Options:");
             System.out.println("1. Send Text Message");
             System.out.println("2. Send Media Message");
             System.out.println("3. Edit Message");
@@ -33,88 +34,23 @@ public class ChatSessionMenu {
             System.out.println("0. Back");
             Console.printSeparator();
             System.out.print("Choose an option: ");
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine();
-            Role role = chat.getRoleofUser(user);
+            int choice = Console.NextInt(MainApp.scanner);
 
             switch (choice) {
                 case 1:
-                    if (role.canSendMessage())
-                    {
-                        System.out.print("Enter text message: ");
-                        String textContent = MainApp.scanner.nextLine();
-                        MainApp.messageManager.sendMessage(chat, new TextMessage(user, textContent));
-                    }
-                    else
-                    {
-                        System.out.println("You dont have permission to send Message");
-                        Console.sleep(1000);
-                    }
+                    sendTextMessage();
                     break;
 
                 case 2:
-                    if (role.canSendMessage())
-                    {
-                        System.out.print("Enter media file path: ");
-                        String mediaPath = MainApp.scanner.nextLine();
-                        MainApp.messageManager.sendMessage(chat, new MultimediaMessage(user, mediaPath));
-                    }
-                    else
-                    {
-                        System.out.println("You dont have permission to send Message");
-                        Console.sleep(1000);
-                    }                    
+                    sendMediaMessage();                 
                     break;
 
                 case 3:
-                    System.out.print("Enter message ID : ");
-                    int inputidforedit = MainApp.scanner.nextInt();
-                    MainApp.scanner.nextLine();
-                    Message toeditmessage = chat.findMessageById(inputidforedit);
-                    if (toeditmessage == null)
-                    {
-                        System.out.println("Invalid message ID");
-                    }
-                    else if (toeditmessage instanceof TextMessage)
-                    {
-                        System.out.print("Enter new Text: ");
-                        String newcontent = MainApp.scanner.nextLine();
-                        if (MainApp.messageManager.editMessage(chat, user, toeditmessage, newcontent))
-                        {
-                            System.out.println("Edited Successful");
-                            Console.sleep(1000);
-                        }
-                        else {
-                            System.out.println("You dont have access to Edit messages");
-                            Console.sleep(1000);
-                        }
-                    }
-                    else {
-                        System.out.println("only Text messages can edit");
-                    }
+                    editMessage();
                     break;
 
                 case 4:
-                    System.out.print("Enter message ID : ");
-                    int inputidfordelete = MainApp.scanner.nextInt();
-                    MainApp.scanner.nextLine();
-                    Message todeletemessage = chat.findMessageById(inputidfordelete);
-                    if (todeletemessage == null)
-                    {
-                        System.out.println("Invalid message ID");
-                    }
-                    else
-                    {
-                        if (MainApp.messageManager.deleteMessage(chat, user, todeletemessage))
-                        {
-                            System.out.println("Deleted Successful");
-                            Console.sleep(1000);
-                        }
-                        else {
-                            System.out.println("You dont have access to Delete messages");
-                            Console.sleep(1000);
-                        }
-                    }
+                    deleteMessage();
                     break;
                 
                 case 5 :
@@ -128,7 +64,70 @@ public class ChatSessionMenu {
                     System.out.println("Invalid option. Try again.");
                     Console.sleep(1000);
             }
+
         }
+    }
+
+    private void sendTextMessage() {
+
+        System.out.print("Enter text message: ");
+        String textContent = MainApp.scanner.nextLine();
+        try {
+        MainApp.messageManager.sendMessage(chat, new TextMessage(user, textContent));
+        } 
+        catch (NoPermissionException e) {
+            System.out.println(e.getMessage());
+            Console.sleep(1000);
+        }
+    }
+
+    private void sendMediaMessage() {
+
+        System.out.print("Enter media file path: ");
+        String mediaPath = MainApp.scanner.nextLine();
+         try {
+        MainApp.messageManager.sendMessage(chat, new MultimediaMessage(user, mediaPath));
+        } 
+        catch (NoPermissionException e) {
+                System.out.println(e.getMessage());
+                Console.sleep(1000);
+        }
+    }
+
+    private void editMessage(){
+        System.out.print("Enter message ID : ");
+        int inputidforedit = Console.NextInt(MainApp.scanner);
+        Message toeditmessage;
+        try {
+            toeditmessage = chat.findMessageById(inputidforedit);
+            if (toeditmessage instanceof TextMessage){
+                System.out.print("Enter new Text: ");
+                String newcontent = MainApp.scanner.nextLine();
+                MainApp.messageManager.editMessage(chat, user, toeditmessage, newcontent);
+                System.out.println("Edited Successful");
+            }
+            else {
+                System.out.println("only Text messages can edit");
+            }
+        } catch (IdNotFoundException | NoPermissionException e) {
+            System.out.println(e.getMessage());     
+        }
+        Console.sleep(1000);
+    }
+
+    private void deleteMessage() {
+        System.out.print("Enter message ID : ");
+        int inputidfordelete = Console.NextInt(MainApp.scanner);
+        Message todeletemessage;
+        try {
+            todeletemessage = chat.findMessageById(inputidfordelete);
+            MainApp.messageManager.deleteMessage(chat, user, todeletemessage);
+            System.out.println("Deleted Successful");
+
+        } catch (IdNotFoundException | NoPermissionException e) {
+            System.out.println(e.getMessage());     
+        }
+        Console.sleep(1000);
     }
 
 }

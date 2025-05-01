@@ -2,10 +2,11 @@ package manager;
 
 import java.util.ArrayList;
 import models.Identifiable;
+import models.exception.IdNotFoundException;
 
 public class Finder<T extends Identifiable > {
 
-    public T findByID(ArrayList<T> list , int id)
+    public T findByID(ArrayList<T> list , int id) throws IdNotFoundException
     {
         for (T item : list)
         {
@@ -14,6 +15,6 @@ public class Finder<T extends Identifiable > {
                 return item ;
             }
         }
-        return null ;
+        throw new IdNotFoundException(id);
     }
 }

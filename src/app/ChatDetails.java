@@ -1,12 +1,12 @@
 package app;
 
 
-import java.nio.channels.Channel;
 import models.chat.Chat;
 import models.chat.ChatMember;
-import models.chat.NormalUser;
-import models.chat.Role;
-import models.chat.Viewer;
+import models.exception.NoPermissionException;
+import models.exception.UserAlreadyInChatException;
+import models.exception.UserNotFoundException;
+import models.exception.UserNotInChat;
 import models.message.ActionType;
 import models.message.InfoMessage;
 import models.user.User;
@@ -33,7 +33,7 @@ public class ChatDetails {
             System.out.println("Members : ");
             for (ChatMember member : chat.getMembers())
             {
-            member.showMembers();
+                member.showMembers();
             }
 
             Console.printSeparator();
@@ -46,59 +46,32 @@ public class ChatDetails {
             System.out.println("0. Back");
             Console.printSeparator();
             System.out.print("Choose an option: ");
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine();
-
-            Role role = chat.getRoleofUser(currentUser);
+            int choice = Console.NextInt(MainApp.scanner);
 
             switch (choice) {
                 case 1:
-                    if (role.canAddMember()) {
-                        addMember();
-                    } else {
-                        System.out.println("You do not have permission to add members.");
-                        Console.sleep(1000);
-                    }
+                    addMember();
                     break;
 
                 case 2:
-                    if (role.canDeleteMember()) {
-                        removeMember();
-                    } else {
-                        System.out.println("You do not have permission to remove members.");
-                        Console.sleep(1000);
-                    }
+                    removeMember();
                     break;
 
                 case 3:
-                    if (role.canManageAdmins()) {
-                        promoteAdmin();
-                    } else {
-                        System.out.println("You do not have permission to promote admins.");
-                        Console.sleep(1000);
-                    }
+                    promoteAdmin();
                     break;
 
                 case 4:
-                    if (role.canManageAdmins()) {
-                        demoteAdmin();
-                    } else {
-                        System.out.println("You do not have permission to demote admins.");
-                        Console.sleep(1000);
-                    }
+                    demoteAdmin();
                     break;
 
                 case 5:
-                    if (role.canChangeTopic()) {
-                        changeChatTitle();
-                    } else {
-                        System.out.println("You do not have permission to change the chat title.");
-                        Console.sleep(1000);
-                    }
-                    break;
+                    changeChatTitle();
+                    break ;
 
                 case 0:
                     return;
+
                 default:
                     System.out.println("Invalid option. Try again.");
                     Console.sleep(1000);
@@ -111,99 +84,79 @@ public class ChatDetails {
         Console.clearScreen();
         System.out.print("Enter username to add: ");
         String username = MainApp.scanner.nextLine();
-        User userToAdd = MainApp.userManager.findUserByUsername(username);
+        User userToAdd;
+        try {
+            userToAdd = MainApp.userManager.findUserByUsername(username);
+            MainApp.chatManager.addMember(chat, currentUser, userToAdd);
+            System.out.println("User added successfully.");
+            chat.addMessage(new InfoMessage(currentUser, ActionType.ADDED,userToAdd));
 
-        Role defaultrole = (chat instanceof Channel) ? new Viewer() : new NormalUser();
-
-        if (userToAdd != null) {
-            if (!chat.isUserinChat(userToAdd)) {
-                if(chat.addMember(new ChatMember(userToAdd, defaultrole)));
-                {
-                        System.out.println("User added successfully.");
-                        chat.addMessage(new InfoMessage(currentUser, ActionType.ADDED,userToAdd));
-                }
-                Console.sleep(1000);
-            } 
-            else {
-                System.out.println("user is already a member.");
-                Console.sleep(1000);
-            }
-        } else {
-            System.out.println("User not found.");
-            Console.sleep(1000);
+        } catch (UserNotFoundException | UserAlreadyInChatException | NoPermissionException e) {
+            System.out.println(e.getMessage());
         }
+        Console.sleep(1000);
     }
 
     private void removeMember() {
         Console.clearScreen();
         System.out.print("Enter username to remove: ");
         String username = MainApp.scanner.nextLine();
-        User userToRemove = MainApp.userManager.findUserByUsername(username);
+        User userToRemove;
+        try {
+            userToRemove  = MainApp.userManager.findUserByUsername(username);;
+            MainApp.chatManager.removeMember(chat, currentUser ,userToRemove);
+            System.out.println("User removed successfully.");
+            chat.addMessage(new InfoMessage(currentUser, ActionType.REMOVED,userToRemove));
 
-        if (userToRemove != null && chat.isUserinChat(userToRemove)) {
-            if(chat.removeMember(userToRemove))
-            {
-                System.out.println("User removed successfully.");
-                chat.addMessage(new InfoMessage(currentUser, ActionType.REMOVED,userToRemove));
-            }
-            Console.sleep(1000);
-
-        } 
-        else {
-            System.out.println("User not found in chat.");
-            Console.sleep(1000);
+        } catch (UserNotFoundException | UserNotInChat | NoPermissionException e) {
+            System.out.println(e.getMessage());
         }
-    }
 
+        Console.sleep(1000);
+    }
 
     private void promoteAdmin() {
         Console.clearScreen();
         System.out.print("Enter username to promote: ");
         String username = MainApp.scanner.nextLine();
-        User userToPromote = MainApp.userManager.findUserByUsername(username);
-
-        if (userToPromote != null && chat.isUserinChat(userToPromote)) {
-            if(chat.promoteToAdmin(userToPromote))
-            {
-                System.out.println("User promoted to Admin.");
-            }
-            Console.sleep(1000);
-
-        } 
-        else {
-            System.out.println("User not found in chat.");
-            Console.sleep(1000);
+        User userToPromote;
+        try {
+            userToPromote = MainApp.userManager.findUserByUsername(username);
+            MainApp.chatManager.promoteToAdmin(chat, currentUser, userToPromote);
+            System.out.println("User promoted to Admin.");
+        } catch (UserNotFoundException | UserNotInChat | NoPermissionException e) {
+            System.out.println(e.getMessage());   
         }
+        Console.sleep(1000);
     }
 
     private void demoteAdmin() {
         Console.clearScreen();
         System.out.print("Enter username to demote: ");
         String username = MainApp.scanner.nextLine();
-        User userToDemote = MainApp.userManager.findUserByUsername(username);
-        Role defaultrole = (chat instanceof Channel) ? new Viewer() : new NormalUser();
-
-        if (userToDemote != null && chat.isUserinChat(userToDemote)) 
-        {
-            if(chat.demoteFromAdmin(userToDemote,defaultrole))
-            {
-                System.out.println("User demoted from Admin.");
-            }
-            Console.sleep(1000);
-        } 
-        else {
-            System.out.println("User not found in chat.");
-            Console.sleep(1000);
+        User userToDemote;
+        try {
+            userToDemote = MainApp.userManager.findUserByUsername(username);
+            MainApp.chatManager.demoteFromAdmin(chat, currentUser, userToDemote);
+            System.out.println("User demoted from Admin.");
+        } catch (UserNotFoundException | UserNotInChat | NoPermissionException e) {
+        System.out.println(e.getMessage());
         }
+        Console.sleep(1000);
     }
 
     private void changeChatTitle() {
         Console.clearScreen();
         System.out.print("Enter new chat title: ");
         String newTitle = MainApp.scanner.nextLine();
-        chat.setTitle(newTitle);
-        System.out.println("Chat title changed successfully.");
-        chat.addMessage(new InfoMessage(currentUser, ActionType.RENAMED));
+        try {
+            MainApp.chatManager.changeTitle(chat, currentUser, newTitle);
+            System.out.println("Chat title changed successfully.");
+            chat.addMessage(new InfoMessage(currentUser, ActionType.RENAMED));
+        } catch (NoPermissionException e) {
+            System.out.println(e.getMessage());
+        }
+        
         Console.sleep(1000);
     }
 }

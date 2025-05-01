@@ -1,5 +1,7 @@
 package app;
 
+import models.exception.IdNotFoundException;
+import models.exception.PostLimitExceededException;
 import models.user.Post;
 import models.user.User;
 import util.Console;
@@ -23,8 +25,8 @@ public class ProfileMenu {
             System.out.println("0. Back");
             Console.printSeparator();
             System.out.print("Choose an option: ");
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine();
+            int choice = Console.NextInt(MainApp.scanner);
+            
 
             switch (choice) {
                 case 1:
@@ -58,8 +60,8 @@ public class ProfileMenu {
         System.out.println("0. Back");
         Console.printSeparator();
         System.out.print("Choose an option: ");
-        int choice = MainApp.scanner.nextInt();
-        MainApp.scanner.nextLine();
+        int choice = Console.NextInt(MainApp.scanner);
+        
         switch (choice) {
             case 0:
                 return;
@@ -76,10 +78,11 @@ public class ProfileMenu {
         String caption = MainApp.scanner.nextLine();
         System.out.print("Enter image path: ");
         String imagePath = MainApp.scanner.nextLine();
-
-        if(MainApp.postManager.addPost(user, caption, imagePath))
-        {
-            System.out.println("Post added successfully.");
+        try {
+        MainApp.postManager.addPost(user, caption, imagePath);
+        System.out.println("Post added successfully.");
+        } catch (PostLimitExceededException e) {
+            System.out.println(e.getMessage());
         }
         Console.sleep(1000);
     }
@@ -87,22 +90,16 @@ public class ProfileMenu {
     private void removePost() {
         Console.printSeparator();
         System.out.print("Enter Post ID to Delete: ");
-        int index = MainApp.scanner.nextInt();
-        MainApp.scanner.nextLine();
-
-        
-        Post post = user.getProfile().getPostbyID(index);
-        if (post != null)
-        {
+        int index = Console.NextInt(MainApp.scanner);
+        Post post;
+        try {
+            post = user.getProfile().getPostbyID(index);
             MainApp.postManager.removePost(user, post);
             System.out.println("Post removed successfully.");
-        }
-
-        else {
-            System.out.println("Invalid ID.");
+        } catch (IdNotFoundException e) {
+            System.out.println(e.getMessage());    
         }
         Console.sleep(1000);
-
     }
 
 }

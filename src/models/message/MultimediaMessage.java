@@ -22,7 +22,7 @@ public class MultimediaMessage extends Message {
     @Override
     public void display()
     {
-        String info = "-"+ id + " | Media" + sender.getNickname() + " : " + imagePath + " (" + DateTimeUtil.format(timestamp) + ")" ;
+        String info = "-"+ id + " | Media | " + sender.getNickname() + " : " + imagePath + " (" + DateTimeUtil.format(timestamp) + ")" ;
         System.out.println(info);
     }
 

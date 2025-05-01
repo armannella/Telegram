@@ -1,5 +1,7 @@
 package app;
 
+import models.exception.IdNotFoundException;
+import models.exception.UserNotFoundException;
 import models.user.Post;
 import models.user.User;
 import util.Console;
@@ -20,12 +22,11 @@ public class InstagramMenu {
             System.out.println("0. Back");
 
             System.out.print("Choose an option: ");
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine();
+            int choice = Console.NextInt(MainApp.scanner);
 
             switch (choice) {
                 case 1:
-                    viewUserProfile();
+                    searchUser();
                     break;
                 case 0:
                     return;
@@ -36,41 +37,52 @@ public class InstagramMenu {
         }
     }
 
-    private void viewUserProfile() {
+    private void searchUser() {
         Console.clearScreen();
         System.out.print("Enter username to search: ");
         String username = MainApp.scanner.nextLine();
-        User user = MainApp.userManager.findUserByUsername(username);
+        try {
+            User user = MainApp.userManager.findUserByUsername(username);
+            viewUserProfile(user);
+        } catch (UserNotFoundException e)
+        {
+            System.out.println(e.getMessage());
+            Console.sleep(1000);
+        }
+        
+    }
 
-        if (user != null) {
+    private void viewUserProfile(User user) {
+        while (true) {
             Console.clearScreen();
             System.out.println(" Profile of: " + user.getNickname() + " (" + user.getUsername() + ")");
             Console.printSeparator();
             System.out.println("Phone: " + user.getPhonenumber());
             System.out.println("Bio: " + user.getProfile().getBio());
-            System.out.println("\nPosts:");
+            System.out.println("Posts:");
             Console.printSeparator();
             MainApp.postManager.showUserPosts(user);
-
             Console.printSeparator();
             System.out.println("1. Like a Post");
             System.out.println("0. Back");
             Console.printSeparator();
             System.out.print("Choose an option: ");
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine();
+            int choice = Console.NextInt(MainApp.scanner);
 
             switch (choice) {
                 case 1:
+                
                     System.out.print("Enter Post id to like : ");
-                    int choiceID = MainApp.scanner.nextInt();
-                    MainApp.scanner.nextLine();
-                    Post post = user.getProfile().getPostbyID(choiceID);
-                    if(post!= null)
-                    {
+                    int choiceID = Console.NextInt(MainApp.scanner);
+                    Post post;
+                    try {
+                        post = user.getProfile().getPostbyID(choiceID);
                         post.addLike(viewer);
+                    } catch (IdNotFoundException e) {
+                        System.out.println(e.getMessage());
                     }
                     break;
+
                 case 0:
                     return;
                 default:
@@ -78,9 +90,5 @@ public class InstagramMenu {
                     Console.sleep(1000);
                 }
             } 
-            else {
-                System.out.println("User not found.");
-                Console.sleep(1000);
-        }
     }
 }

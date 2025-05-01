@@ -1,5 +1,8 @@
 package app;
 
+import models.exception.InvalidCredentialsException;
+import models.exception.UserAlreadyExistsException;
+import models.exception.UserNotFoundException;
 import models.user.User;
 import util.Console;
 
@@ -17,8 +20,7 @@ public class WelcomeMenu {
             System.out.println("3. Exit");
             Console.printSeparator();
             System.out.print("Choose an option: ");
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine();
+            int choice = Console.NextInt(MainApp.scanner);
 
             switch (choice) {
                 case 1:
@@ -27,19 +29,22 @@ public class WelcomeMenu {
                     break;
 
                 case 2:
-                    User user = login();
-                    Console.sleep(1000);
-                    if (user != null) {
+                    try {
+                        User user = login();
+                        Console.sleep(1000);
                         MainMenu mainMenu = new MainMenu(user);
                         mainMenu.show();
-                        break;
+                    } catch(UserNotFoundException | InvalidCredentialsException e) {
+                        System.out.println(e.getMessage());
+                        Console.sleep(1000);
                     }
                     break;
-
+ 
                 case 3:
                     System.out.println("GoodBye .");
                     Console.sleep(1000);
                     return;
+
                 default:
                     System.out.println("Invalid option. Please try again.");
                     Console.sleep(1000);
@@ -63,22 +68,16 @@ public class WelcomeMenu {
         System.out.print("Phone number: ");
         String phone = MainApp.scanner.nextLine();
 
-
-
-        if(MainApp.userManager.userExists(username) || MainApp.userManager.phoneNumberExists(phone))
-        {
-            System.out.println("User Exists");
-            return ;
-        }
-
-        else {
-            MainApp.userManager.register(username, password, nickname, phone);
-            System.out.println("Register Successful");
-        }
-        
-        
+        try {
+        MainApp.userManager.register(username, password, nickname, phone);
+        System.out.println("Register Successful");
+        } 
+        catch (UserAlreadyExistsException e){
+            System.out.println(e.getMessage());
+        } 
     }
-    public User login()
+
+    public User login() throws UserNotFoundException, InvalidCredentialsException 
     {
         Console.clearScreen();
         System.out.println("Login Menu");
@@ -89,13 +88,7 @@ public class WelcomeMenu {
         String password = MainApp.scanner.nextLine();
 
         User user = MainApp.userManager.login(username, password);
-        if (user == null) {
-            System.out.println("Login failed. Try again.");
-            return null;
-        }
-    
         System.out.println("Welcome, " + user.getNickname() + "!");
         return user;
-
     }
 }

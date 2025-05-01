@@ -2,6 +2,7 @@ package models.user;
 
 import java.util.ArrayList;
 import manager.Finder;
+import models.exception.IdNotFoundException;
 
 public class Profile {
 
@@ -37,7 +38,7 @@ public class Profile {
         return posts.size();
     }
 
-    public Post getPostbyID (int id)
+    public Post getPostbyID (int id) throws IdNotFoundException
     {
         Finder<Post> finder = new Finder<>();
         return finder.findByID(posts, id);

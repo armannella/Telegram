@@ -105,7 +105,7 @@ public class AccountDetails {
                 user.setUserplan(new GoldPlan());
                 break;
             default:
-                System.out.println("❌ Invalid plan choice.");
+                System.out.println("Invalid plan choice.");
                 Console.sleep(1000);
                 return;
         }

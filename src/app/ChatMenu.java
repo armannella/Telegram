@@ -1,6 +1,7 @@
 package app;
 import java.util.ArrayList;
 import models.chat.Chat;
+import models.exception.IdNotFoundException;
 import models.user.User;
 import util.Console;
 
@@ -23,8 +24,6 @@ public class ChatMenu {
             Console.clearScreen();
             System.out.println("\n Your Chats:");
             
-
-
             for (Chat chat : userChats) {
                 System.out.println(chat.getID() + ". " + chat.getType() + " Chat - " + chat.getTitle());
             }
@@ -34,23 +33,20 @@ public class ChatMenu {
             Console.printSeparator();
             System.out.print("Select a chat by ID: ");
 
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine();
+            int choice = Console.NextInt(MainApp.scanner);
 
             if (choice == 0) {
                 return; 
             }
 
-            Chat selectedChat = MainApp.chatManager.getChatById(choice);
-            if (selectedChat != null && selectedChat.isUserinChat(user)) {
-                
-                System.out.println("Entering chat...");
-                Console.sleep(1000);
-                ChatSessionMenu chatSessionMenu = new ChatSessionMenu(user, selectedChat);
-                chatSessionMenu.show();
-                
-            } else {
-                System.out.println("Invalid chat ID or you are not a member!");
+            try {
+            Chat selectedChat = MainApp.chatManager.getChatById(choice);  
+            System.out.println("Entering chat...");
+            Console.sleep(1000);
+            ChatSessionMenu chatSessionMenu = new ChatSessionMenu(user, selectedChat);
+            chatSessionMenu.show(); 
+            } catch (IdNotFoundException e) {
+                System.out.println(e.getMessage());
                 Console.sleep(1000);
             }
         }

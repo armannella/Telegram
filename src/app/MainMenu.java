@@ -22,8 +22,7 @@ public class MainMenu {
             System.out.println("5. Logout");
             Console.printSeparator();
             System.out.print("Choose an option: ");
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine(); 
+            int choice = Console.NextInt(MainApp.scanner);
 
             switch (choice) {
                 case 1:

@@ -3,6 +3,7 @@ package models.chat;
 import java.util.ArrayList;
 import manager.Finder;
 import models.Identifiable;
+import models.exception.IdNotFoundException;
 import models.message.Message;
 import models.user.User;
 
@@ -18,13 +19,13 @@ public abstract class Chat implements Identifiable{
         this.id = counter ;
         counter++ ;
     }
-    public boolean addMember(ChatMember user)
+
+    public void addMember(ChatMember user) 
     {
         members.add(user);
-        return true ;
     }
 
-    public boolean removeMember(User user)
+    public void removeMember(User user)
     {
         for (ChatMember member : members)
         {
@@ -33,7 +34,6 @@ public abstract class Chat implements Identifiable{
                 members.remove(member);
             }
         }
-        return true ;
     }
     
     public ArrayList<ChatMember> getMembers()
@@ -84,7 +84,7 @@ public abstract class Chat implements Identifiable{
         return false ;
     }
 
-    public Message findMessageById(int id) {
+    public Message findMessageById(int id) throws IdNotFoundException {
 
         Finder<Message> finder = new Finder<>();
         return finder.findByID(messages, id);
@@ -110,26 +110,17 @@ public abstract class Chat implements Identifiable{
         return this.Title;
     }
     
-    public boolean promoteToAdmin(User user)
-    {
-        for (ChatMember member : members) {
-            if (member.getUser().equals(user)) {
-                member.setRole(new Admin());
-            }
-        }
-        return true;
-    }
-
-    public boolean demoteFromAdmin(User user , Role role)
+    public void changeRoleOfUser(User user , Role role)
     {
         for (ChatMember member : members) {
             if (member.getUser().equals(user)) {
                 member.setRole(role);
+                break ;
             }
         }
-        return true;
     }
     
     public abstract String getType();
+    public abstract Role getDefaultJoinRole();
 
 }

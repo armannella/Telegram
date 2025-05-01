@@ -1,28 +1,23 @@
 package manager;
 
+import models.exception.PostLimitExceededException;
 import models.user.*;
 
 public class PostManager {
-    public boolean addPost(User user , String caption, String imagePath)
+    public void addPost(User user , String caption, String imagePath) throws PostLimitExceededException
     {
         if(user.getProfile().countPosts() >= user.getUserplan().getMaxPosts())
         {
-            System.out.println("You Reached Max amount of Posts");
-            return false ;
+            throw new PostLimitExceededException();
         }
+
         Post post = new Post(caption, imagePath);
         user.getProfile().addPost(post);
-        return true ;
     }
 
-    public boolean removePost(User user , Post post)
+    public void removePost(User user , Post post)
     {
-        if(user.getProfile().getPosts().contains(post))
-        {
             user.getProfile().removePost(post);
-            return true ;
-        }
-        return false ;
     }
 
     public void showUserPosts(User user) {

@@ -1,8 +1,10 @@
 package util;
 
+import java.util.InputMismatchException;
+import java.util.Scanner;
+
 public class Console {
 
-    /* use it for clearing terminal before showing new menu **/
     public static void clearScreen() {
         try {
             if (System.getProperty("os.name").contains("Windows")) {
@@ -25,8 +27,25 @@ public class Console {
         }
     }
 
-    /*print a separator line for better design in terminal **/
     public static void printSeparator() {
         System.out.println("------------------------------------------");
     }
+
+
+    public static int NextInt(Scanner scanner)
+    {
+            while (true) {
+                try {
+                    int input = scanner.nextInt();
+                    scanner.nextLine();
+                    return input;
+
+                } catch (InputMismatchException e) {
+                    System.out.println("Invalid input. Please enter a number.");
+                    scanner.nextLine(); 
+                }
+            }
+    }
+        
 }
+

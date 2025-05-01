@@ -1,6 +1,8 @@
 package app;
 
 import models.chat.*;
+import models.exception.NoPermissionException;
+import models.exception.UserNotFoundException;
 import models.user.*;
 import util.Console;
 
@@ -23,8 +25,7 @@ public class NewChatMenu {
             System.out.println("0. Back");
             Console.printSeparator();
             System.out.print("Choose an option: ");
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine();
+            int choice = Console.NextInt(MainApp.scanner);
             UserPlan userPlan = user.getUserplan();
 
             switch (choice) {
@@ -33,27 +34,11 @@ public class NewChatMenu {
                     break;
 
                 case 2:
-                    if(userPlan.canCreateGroup())
-                    {
-                        createGroupChat();
-                    }
-                    else
-                    {
-                        System.out.println("you Should Upgrade your userPlan to create Group");
-                        Console.sleep(1000);
-                    }
+                    createGroupChat();
                     break;
 
                 case 3:
-                    if(userPlan.canCreateChannel())
-                    {
-                        createChannel();
-                    }
-                    else
-                    {
-                        System.out.println("you Should Upgrade your userPlan to create Channel");
-                        Console.sleep(1000);
-                    }
+                    createChannel();
                     break;
 
                 case 0:
@@ -70,41 +55,50 @@ public class NewChatMenu {
         Console.clearScreen();
         System.out.print("Enter username of the other user: ");
         String username = MainApp.scanner.nextLine();
-        User other = MainApp.userManager.findUserByUsername(username);
-
-        if (other == null) {
-            System.out.println("User not found.");
+        User other;
+        try {
+            other = MainApp.userManager.findUserByUsername(username);
+            PV pv = MainApp.chatManager.createPrivateChat(user, other);
+            System.out.println("Private Chat created successfully.");
             Console.sleep(1000);
-            return;
+            new ChatSessionMenu(user, pv).show();
+        } catch (UserNotFoundException e) {
+            System.out.println(e.getMessage());
+            Console.sleep(1000);
         }
-
-        PV pv = MainApp.chatManager.createPrivateChat(user, other);
-        System.out.println("Private Chat created successfully.");
-        Console.sleep(1000);
-        new ChatSessionMenu(user, pv).show();
     }
 
     private void createGroupChat() {
         Console.clearScreen();
         System.out.print("Enter Group Title : ");
         String title = MainApp.scanner.nextLine();
-        Group group = MainApp.chatManager.createGroupChat(user, title);
+        Group group;
+        try {
+            group = MainApp.chatManager.createGroupChat(user, title);
+            System.out.println("Group created successfully.");
+            Console.sleep(1000);
+            new ChatSessionMenu(user, group).show();
 
-        System.out.println("Group created successfully.");
-        Console.sleep(1000);
-        new ChatSessionMenu(user, group).show();
-        
+        } catch (NoPermissionException e) {
+            System.out.println(e.getMessage());
+            Console.sleep(1000);
+        }
     }
 
     private void createChannel() {
         Console.clearScreen();
         System.out.print("Enter Channel Title : ");
         String title = MainApp.scanner.nextLine();
+        try {
         Channel channel = MainApp.chatManager.createChannel(user, title);
-
         System.out.println("Channel created successfully.");
         Console.sleep(1000);
         new ChatSessionMenu(user, channel).show();
+
+        } catch (NoPermissionException e) {
+            System.out.println(e.getMessage());
+            Console.sleep(1000);
+        }
     }
 }
 
