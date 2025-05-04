@@ -80,7 +80,6 @@ public class ChatManager {
         return false ;
     }
 
-
     public void addMember(Chat chat, User actor, User target) throws NoPermissionException, UserAlreadyInChatException {
 
         Role actorRole = chat.getRoleofUser(actor);

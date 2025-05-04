@@ -24,9 +24,6 @@ public class User {
         return this.getPassword().equals(password) ;
     }
 
-
-/* Setter and Getters Methods */
-
     public String getUsername() {
         return username;
     }

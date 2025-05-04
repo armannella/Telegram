@@ -3,7 +3,7 @@ package models.message;
 public enum ActionType {
     ADDED("added"),
     REMOVED("removed"),
-    RENAMED("changed the Chat name to"),
+    RENAMED("changed the Chat name"),
     CREATED("Created This Chat");
 
     private final String text;

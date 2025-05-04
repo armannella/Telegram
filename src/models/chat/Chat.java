@@ -9,7 +9,7 @@ import models.user.User;
 
 public abstract class Chat implements Identifiable{
     private static int counter = 1 ;
-    private int id ;
+    private final int id ;
     private ArrayList<ChatMember> members = new ArrayList<>();
     private ArrayList<Message> messages = new ArrayList<>();
     private String Title ;

@@ -56,7 +56,6 @@ public class Post implements Identifiable{
         }  
     }
 
-    
     public void removeLike(User user)
     {
         if(likes.contains(user))
@@ -84,17 +83,6 @@ public class Post implements Identifiable{
         for (User user : likes) {
             System.out.println(user.getUsername());
         }
-    }
-
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Post)) return false;
-        Post other = (Post) obj;
-        return this.caption.equals(other.caption) &&
-               this.imagePath.equals(other.imagePath) &&
-               this.timestamp.equals(other.timestamp);
     }
 
     @Override

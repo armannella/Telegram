@@ -31,7 +31,6 @@ public class Console {
         System.out.println("------------------------------------------");
     }
 
-
     public static int NextInt(Scanner scanner)
     {
             while (true) {

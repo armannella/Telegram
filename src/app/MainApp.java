@@ -9,7 +9,6 @@ public class MainApp {
     public static ChatManager chatManager = new ChatManager();
     public static MessageManager messageManager = new MessageManager();
     public static PostManager postManager = new PostManager();
-
     public static Scanner scanner = new Scanner(System.in);
 
 

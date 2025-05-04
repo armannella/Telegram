@@ -33,8 +33,7 @@ public class AccountDetails {
             System.out.println("0. Back");
             Console.printSeparator();
             System.out.print("Choose an option: ");
-            int choice = MainApp.scanner.nextInt();
-            MainApp.scanner.nextLine();
+            int choice = Console.NextInt(MainApp.scanner);
 
             switch (choice) {
                 case 1:
@@ -91,8 +90,7 @@ public class AccountDetails {
         System.out.println("3. Gold Plan");
         System.out.print("Choose a new plan: ");
         
-        int planChoice = MainApp.scanner.nextInt();
-        MainApp.scanner.nextLine();
+        int planChoice = Console.NextInt(MainApp.scanner);
 
         switch (planChoice) {
             case 1:

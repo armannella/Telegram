@@ -26,7 +26,6 @@ public class NewChatMenu {
             Console.printSeparator();
             System.out.print("Choose an option: ");
             int choice = Console.NextInt(MainApp.scanner);
-            UserPlan userPlan = user.getUserplan();
 
             switch (choice) {
                 case 1:

@@ -85,12 +85,12 @@ public class ChatSessionMenu {
 
         System.out.print("Enter media file path: ");
         String mediaPath = MainApp.scanner.nextLine();
-         try {
-        MainApp.messageManager.sendMessage(chat, new MultimediaMessage(user, mediaPath));
+        try {
+            MainApp.messageManager.sendMessage(chat, new MultimediaMessage(user, mediaPath));
         } 
         catch (NoPermissionException e) {
-                System.out.println(e.getMessage());
-                Console.sleep(1000);
+            System.out.println(e.getMessage());
+            Console.sleep(1000);
         }
     }
 
