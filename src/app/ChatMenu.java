@@ -11,8 +11,7 @@ public class ChatMenu {
     
     public ChatMenu(User user)
     {
-        this.user = user ;
-        
+        this.user = user ;  
     }
 
     public void show()

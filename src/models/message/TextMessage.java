@@ -32,6 +32,7 @@ public class TextMessage extends Message {
         System.out.println(info);
     }
 
+    @Override
     public void edit(String content)
     {
         this.content = content ;
@@ -43,5 +44,10 @@ public class TextMessage extends Message {
         return this.edited ;
     }
 
+
+    @Override
+    public boolean editable() {
+        return true;
+    }
 
 }

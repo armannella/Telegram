@@ -1,5 +1,7 @@
 package app;
 
+import java.util.HashMap;
+import java.util.Map;
 import models.exception.InvalidCredentialsException;
 import models.exception.UserAlreadyExistsException;
 import models.exception.UserNotFoundException;
@@ -8,10 +10,22 @@ import util.Console;
 
 public class WelcomeMenu {
 
-    public void show()
-    {
+    private final Map<Integer, Runnable> menuActions = new HashMap<>();
+
+    public WelcomeMenu() {
+        initializeMenuActions();
+    }
+    
+    private void initializeMenuActions() {
+        menuActions.put(1, this::register);
+        menuActions.put(2, this::login);
+        menuActions.put(3, this::exitApp);
+    }
+
+    public void show() {  
         
         while (true) {
+
             Console.clearScreen();
             Console.printSeparator();
             System.out.println("Welcome to Telegram Messenger");
@@ -22,40 +36,24 @@ public class WelcomeMenu {
             System.out.print("Choose an option: ");
             int choice = Console.NextInt(MainApp.scanner);
 
-            switch (choice) {
-                case 1:
-                    register();
-                    Console.sleep(1000);
-                    break;
-
-                case 2:
-                    try {
-                        User user = login();
-                        Console.sleep(1000);
-                        MainMenu mainMenu = new MainMenu(user);
-                        mainMenu.show();
-                    } catch(UserNotFoundException | InvalidCredentialsException e) {
-                        System.out.println(e.getMessage());
-                        Console.sleep(1000);
-                    }
-                    break;
- 
-                case 3:
-                    System.out.println("GoodBye .");
-                    Console.sleep(1000);
-                    return;
-
-                default:
-                    System.out.println("Invalid option. Please try again.");
-                    Console.sleep(1000);
-                    break;
+            Runnable action = menuActions.get(choice);
+            if (action != null) {
+                action.run();
+            } else {
+                System.out.println("Invalid option. Please try again.");
+                Console.sleep(1000);
             }
         }
     }
 
+    private void exitApp() {
+        System.out.println("GoodBye.");
+        Console.sleep(1000);
+        System.exit(0);
+    }
 
-    public void register()
-    {
+    private void register(){
+
         Console.clearScreen();
         System.out.println("Register New User");
         Console.printSeparator();
@@ -71,13 +69,16 @@ public class WelcomeMenu {
         try {
         MainApp.userManager.register(username, password, nickname, phone);
         System.out.println("Register Successful");
-        } 
+        
+        }
         catch (UserAlreadyExistsException e){
             System.out.println(e.getMessage());
         } 
+        Console.sleep(1000);
+
     }
 
-    public User login() throws UserNotFoundException, InvalidCredentialsException 
+    private User performLogin() throws UserNotFoundException, InvalidCredentialsException 
     {
         Console.clearScreen();
         System.out.println("Login Menu");
@@ -90,5 +91,18 @@ public class WelcomeMenu {
         User user = MainApp.userManager.login(username, password);
         System.out.println("Welcome, " + user.getNickname() + "!");
         return user;
+    }
+
+    private void login()
+    {
+        try {
+            User user = performLogin();
+            Console.sleep(1000);
+            MainMenu mainMenu = new MainMenu(user);
+            mainMenu.show();
+        } catch(UserNotFoundException | InvalidCredentialsException e) {
+            System.out.println(e.getMessage());
+            Console.sleep(1000);
+        }
     }
 }

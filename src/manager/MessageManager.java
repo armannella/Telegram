@@ -3,8 +3,8 @@ package manager;
 import models.chat.Chat;
 import models.chat.ChatMember;
 import models.exception.NoPermissionException;
+import models.exception.NotEditableMessageException;
 import models.message.Message;
-import models.message.TextMessage;
 import models.user.User;
 
 public class MessageManager {
@@ -29,21 +29,18 @@ public class MessageManager {
 
     }
 
-    public void editMessage(Chat chat, User editor, Message message, String newContent) throws NoPermissionException {
+    public void editMessage(Chat chat, User editor, Message message, String newContent) throws NoPermissionException, NotEditableMessageException {
 
         ChatMember editorMember = getChatMember(chat, editor) ;
         if(editorMember.getRole().canEditMessage(message, editor))
         {
-            if(message instanceof TextMessage)
-            {
-                ((TextMessage) message).edit(newContent);
-            }
+                message.edit(newContent);
         }
         else {
             throw new NoPermissionException("edit Message");
         }
 
-    }    
+    }     
 
     public void displayChatMessages(Chat chat) 
     {

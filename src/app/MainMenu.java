@@ -1,13 +1,24 @@
 package app;
+import java.util.HashMap;
+import java.util.Map;
 import models.user.User;
 import util.Console;
 
 public class MainMenu {
     
     private User user;
+    private final Map<Integer, Runnable> menuActions = new HashMap<>();
 
     public MainMenu(User user) {
         this.user = user;
+        initializeMenuActions();       
+    }
+
+    private void initializeMenuActions() {
+        menuActions.put(1, () -> new ChatMenu(user).show());
+        menuActions.put(2, () -> new NewChatMenu(user).show());
+        menuActions.put(3, () -> new InstagramMenu(user).show());
+        menuActions.put(4, () -> new ProfileMenu(user).show());
     }
 
     public void show() {
@@ -19,35 +30,19 @@ public class MainMenu {
             System.out.println("2. Create New Chat");
             System.out.println("3. Instagram");
             System.out.println("4. My Profile");
-            System.out.println("5. Logout");
+            System.out.println("0. Logout");
             Console.printSeparator();
             System.out.print("Choose an option: ");
             int choice = Console.NextInt(MainApp.scanner);
 
-            switch (choice) {
-                case 1:
-                    ChatMenu chatmenu = new ChatMenu(user);
-                    chatmenu.show();
-                    break;
+            if (choice == 0) return;
 
-                case 2:
-                    NewChatMenu newChatMenu = new NewChatMenu(user);
-                    newChatMenu.show();
-                    break;
-                case 3:
-                    InstagramMenu InstagramMenu = new InstagramMenu(user);
-                    InstagramMenu.show();
-                    break;
-                case 4:
-                    ProfileMenu profileMenu = new ProfileMenu(user);
-                    profileMenu.show();
-                    break;
-                case 5:
-                    System.out.println("Logging out...");
-                    return;
-                default:
-                    System.out.println("Invalid option. Try again.");
-                    Console.sleep(1000);
+            Runnable action = menuActions.get(choice);
+            if (action != null) {
+                action.run();
+            } else {
+                System.out.println("Invalid option. Try again.");
+                Console.sleep(1000);
             }
         }
 }

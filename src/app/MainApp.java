@@ -13,6 +13,7 @@ public class MainApp {
 
 
     public static void main(String[] args) {
+        util.inputs.add_some_members();
         WelcomeMenu welcomeMenu = new WelcomeMenu();
         welcomeMenu.show();
     }

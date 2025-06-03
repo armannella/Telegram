@@ -7,7 +7,6 @@ public class Channel extends Chat{
         super();
         super.setTitle(title);
         addMember(owner);
-
     }
 
     @Override

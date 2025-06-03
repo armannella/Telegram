@@ -1,8 +1,11 @@
 package app;
 
+import java.util.HashMap;
+import java.util.Map;
 import models.chat.Chat;
 import models.exception.IdNotFoundException;
 import models.exception.NoPermissionException;
+import models.exception.NotEditableMessageException;
 import models.message.Message;
 import models.message.MultimediaMessage;
 import models.message.TextMessage;
@@ -12,10 +15,20 @@ import util.Console;
 public class ChatSessionMenu {
     private User user;
     private Chat chat;
+    private final Map<Integer, Runnable> menuActions = new HashMap<>();
 
     public ChatSessionMenu(User user, Chat chat) {
         this.user = user;
         this.chat = chat;
+        initializeMenuActions();
+    }
+
+    private void initializeMenuActions() {
+        menuActions.put(1, this::sendTextMessage);
+        menuActions.put(2, this::sendMediaMessage);
+        menuActions.put(3, this::editMessage);
+        menuActions.put(4, this::deleteMessage);
+        menuActions.put(5, this::showChatDetails);
     }
 
     public void show() {
@@ -36,98 +49,71 @@ public class ChatSessionMenu {
             System.out.print("Choose an option: ");
             int choice = Console.NextInt(MainApp.scanner);
 
-            switch (choice) {
-                case 1:
-                    sendTextMessage();
-                    break;
+            if (choice == 0) return;
 
-                case 2:
-                    sendMediaMessage();                 
-                    break;
-
-                case 3:
-                    editMessage();
-                    break;
-
-                case 4:
-                    deleteMessage();
-                    break;
-                
-                case 5 :
-                    ChatDetails chatDetails = new ChatDetails(chat, user);
-                    chatDetails.show();
-                    break ;
-                    
-                case 0:
-                    return;
-                default:
-                    System.out.println("Invalid option. Try again.");
-                    Console.sleep(1000);
+            Runnable action = menuActions.get(choice);
+            if (action != null) {
+                action.run();
+            } else {
+                System.out.println("Invalid option. Try again.");
+                Console.sleep(1000);
             }
-
         }
     }
 
     private void sendTextMessage() {
-
         System.out.print("Enter text message: ");
         String textContent = MainApp.scanner.nextLine();
         try {
-        MainApp.messageManager.sendMessage(chat, new TextMessage(user, textContent));
-        } 
-        catch (NoPermissionException e) {
+            MainApp.messageManager.sendMessage(chat, new TextMessage(user, textContent));
+        } catch (NoPermissionException e) {
             System.out.println(e.getMessage());
             Console.sleep(1000);
         }
     }
 
     private void sendMediaMessage() {
-
         System.out.print("Enter media file path: ");
         String mediaPath = MainApp.scanner.nextLine();
         try {
             MainApp.messageManager.sendMessage(chat, new MultimediaMessage(user, mediaPath));
-        } 
-        catch (NoPermissionException e) {
+        } catch (NoPermissionException e) {
             System.out.println(e.getMessage());
             Console.sleep(1000);
         }
     }
 
-    private void editMessage(){
-        System.out.print("Enter message ID : ");
-        int inputidforedit = Console.NextInt(MainApp.scanner);
-        Message toeditmessage;
+    private void editMessage() {
+        System.out.print("Enter message ID: ");
+        int messageId = Console.NextInt(MainApp.scanner);
         try {
-            toeditmessage = chat.findMessageById(inputidforedit);
-            if (toeditmessage instanceof TextMessage){
-                System.out.print("Enter new Text: ");
-                String newcontent = MainApp.scanner.nextLine();
-                MainApp.messageManager.editMessage(chat, user, toeditmessage, newcontent);
-                System.out.println("Edited Successful");
-            }
-            else {
-                System.out.println("only Text messages can edit");
-            }
-        } catch (IdNotFoundException | NoPermissionException e) {
-            System.out.println(e.getMessage());     
-        }
+                Message message = chat.findMessageById(messageId);
+                System.out.print("Enter new text: ");
+                String newText = MainApp.scanner.nextLine();
+                MainApp.messageManager.editMessage(chat, user, message, newText);
+                System.out.println("Edit successful.");
+
+        } catch (IdNotFoundException | NoPermissionException | NotEditableMessageException e) {
+            System.out.println(e.getMessage());
+        } 
         Console.sleep(1000);
     }
-
+    
     private void deleteMessage() {
-        System.out.print("Enter message ID : ");
-        int inputidfordelete = Console.NextInt(MainApp.scanner);
-        Message todeletemessage;
+        System.out.print("Enter message ID: ");
+        int messageId = Console.NextInt(MainApp.scanner);
         try {
-            todeletemessage = chat.findMessageById(inputidfordelete);
-            MainApp.messageManager.deleteMessage(chat, user, todeletemessage);
-            System.out.println("Deleted Successful");
-
+            Message message = chat.findMessageById(messageId);
+            MainApp.messageManager.deleteMessage(chat, user, message);
+            System.out.println("Delete successful.");
         } catch (IdNotFoundException | NoPermissionException e) {
-            System.out.println(e.getMessage());     
+            System.out.println(e.getMessage());
         }
         Console.sleep(1000);
     }
 
+    private void showChatDetails() {
+        ChatDetails chatDetails = new ChatDetails(chat, user);
+        chatDetails.show();
+    }
 }

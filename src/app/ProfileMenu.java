@@ -1,5 +1,7 @@
 package app;
 
+import java.util.HashMap;
+import java.util.Map;
 import models.exception.IdNotFoundException;
 import models.exception.PostLimitExceededException;
 import models.user.Post;
@@ -8,9 +10,18 @@ import util.Console;
 
 public class ProfileMenu {
     private User user;
+    private final Map<Integer, Runnable> menuActions = new HashMap<>();
 
     public ProfileMenu(User user) {
         this.user = user;
+        initializeMenuActions();
+    }
+
+    private void initializeMenuActions() {
+        menuActions.put(1, this::viewPosts);
+        menuActions.put(2, this::addPost);
+        menuActions.put(3, this::removePost);
+        menuActions.put(4, () -> new AccountDetails(user).show());
     }
 
     public void show() {
@@ -28,25 +39,14 @@ public class ProfileMenu {
             int choice = Console.NextInt(MainApp.scanner);
             
 
-            switch (choice) {
-                case 1:
-                    viewPosts();
-                    break;
-                case 2:
-                    addPost();
-                    break;
-                case 3:
-                    removePost();
-                    break;
-                case 4:
-                    AccountDetails accountDetails = new AccountDetails(user);
-                    accountDetails.show();
-                    break;
-                case 0:
-                    return;
-                default:
-                    System.out.println("Invalid option. Try again.");
-                    Console.sleep(1000);
+            if (choice == 0) return;
+
+            Runnable action = menuActions.get(choice);
+            if (action != null) {
+                action.run();
+            } else {
+                System.out.println("Invalid option. Try again.");
+                Console.sleep(1000);
             }
         }
     }

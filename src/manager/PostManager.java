@@ -4,6 +4,7 @@ import models.exception.PostLimitExceededException;
 import models.user.*;
 
 public class PostManager {
+    
     public void addPost(User user , String caption, String imagePath) throws PostLimitExceededException
     {
         if(user.getProfile().countPosts() >= user.getUserplan().getMaxPosts())

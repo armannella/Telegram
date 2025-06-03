@@ -1,6 +1,7 @@
 package models.message;
 import java.time.LocalDateTime;
 import models.Identifiable;
+import models.exception.NotEditableMessageException;
 import models.user.*;
 
 public abstract class Message implements Identifiable{
@@ -33,4 +34,8 @@ public abstract class Message implements Identifiable{
     {
         return this.id ;
     }
+
+    public abstract boolean editable();
+    public abstract void edit(String newContent) throws NotEditableMessageException;
+
 }

@@ -1,5 +1,6 @@
 package models.message;
 
+import models.exception.NotEditableMessageException;
 import models.user.*;
 import util.DateTimeUtil;
 
@@ -25,4 +26,13 @@ public class MultimediaMessage extends Message {
         System.out.println(info);
     }
 
+    @Override
+    public boolean editable() {
+        return false;
+    }
+
+    @Override
+    public void edit(String newContent) throws NotEditableMessageException{
+        throw new NotEditableMessageException("MultiMedia");
+    }
 }

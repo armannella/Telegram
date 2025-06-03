@@ -1,5 +1,7 @@
 package app;
 
+import java.util.HashMap;
+import java.util.Map;
 import models.exception.IdNotFoundException;
 import models.exception.UserNotFoundException;
 import models.user.Post;
@@ -7,10 +9,22 @@ import models.user.User;
 import util.Console;
 
 public class InstagramMenu {
-    private User viewer; 
+    private User viewer;
+    private User postowner;
+    private final Map<Integer, Runnable> mainMenuActions = new HashMap<>();
+    private final Map<Integer, Runnable> profileActions = new HashMap<>();
 
     public InstagramMenu(User viewer) {
         this.viewer = viewer;
+        initializeMenuActions();
+    }
+
+    private void initializeMenuActions() {
+        //menu action
+        mainMenuActions.put(1, this::searchUser);
+
+        //profile acction
+        profileActions.put(1, () -> likePost(postowner));
     }
 
     public void show() {
@@ -20,19 +34,18 @@ public class InstagramMenu {
             Console.printSeparator();
             System.out.println("1. View a User's Profile");
             System.out.println("0. Back");
-
+            Console.printSeparator();
             System.out.print("Choose an option: ");
             int choice = Console.NextInt(MainApp.scanner);
 
-            switch (choice) {
-                case 1:
-                    searchUser();
-                    break;
-                case 0:
-                    return;
-                default:
-                    System.out.println("Invalid option. Try again.");
-                    Console.sleep(1000);
+            if (choice == 0) return;
+
+            Runnable action = mainMenuActions.get(choice);
+            if (action != null) {
+                action.run();
+            } else {
+                System.out.println("Invalid option. Try again.");
+                Console.sleep(1000);
             }
         }
     }
@@ -43,13 +56,12 @@ public class InstagramMenu {
         String username = MainApp.scanner.nextLine();
         try {
             User user = MainApp.userManager.findUserByUsername(username);
+            this.postowner = user;
             viewUserProfile(user);
-        } catch (UserNotFoundException e)
-        {
+        } catch (UserNotFoundException e) {
             System.out.println(e.getMessage());
             Console.sleep(1000);
         }
-        
     }
 
     private void viewUserProfile(User user) {
@@ -69,26 +81,29 @@ public class InstagramMenu {
             System.out.print("Choose an option: ");
             int choice = Console.NextInt(MainApp.scanner);
 
-            switch (choice) {
-                case 1:
-                
-                    System.out.print("Enter Post id to like : ");
-                    int choiceID = Console.NextInt(MainApp.scanner);
-                    Post post;
-                    try {
-                        post = user.getProfile().getPostbyID(choiceID);
-                        post.addLike(viewer);
-                    } catch (IdNotFoundException e) {
-                        System.out.println(e.getMessage());
-                    }
-                    break;
+            if (choice == 0) return;
 
-                case 0:
-                    return;
-                default:
-                    System.out.println("Invalid option. Try again.");
-                    Console.sleep(1000);
-                }
-            } 
+            Runnable action = profileActions.get(choice);
+            if (action != null) {
+                action.run();
+            } else {
+                System.out.println("Invalid option. Try again.");
+                Console.sleep(1000);
+            }
+        }
+    }
+
+    private void likePost(User postOwner) {
+        System.out.print("Enter Post ID to like: ");
+        int postId = Console.NextInt(MainApp.scanner);
+        try {
+            Post post = postOwner.getProfile().getPostbyID(postId);
+            post.addLike(viewer);
+            System.out.println("Post liked successfully.");
+            Console.sleep(1000);
+        } catch (IdNotFoundException e) {
+            System.out.println(e.getMessage());
+            Console.sleep(1000);
+        }
     }
 }

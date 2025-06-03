@@ -1,6 +1,7 @@
 package app;
 
-
+import java.util.HashMap;
+import java.util.Map;
 import models.chat.Chat;
 import models.chat.ChatMember;
 import models.exception.NoPermissionException;
@@ -16,23 +17,33 @@ public class ChatDetails {
 
     private Chat chat;
     private User currentUser;
+    private final Map<Integer, Runnable> menuActions = new HashMap<>();
 
     public ChatDetails(Chat chat, User currentUser) {
         this.chat = chat;
         this.currentUser = currentUser;
+
+        initializeMenuActions();
     }
 
+    private void initializeMenuActions() {
+        menuActions.put(1, this::addMember);
+        menuActions.put(2, this::removeMember);
+        menuActions.put(3, this::promoteAdmin);
+        menuActions.put(4, this::demoteAdmin);
+        menuActions.put(5, this::changeChatTitle);
+    }
+    
     public void show() {
         while (true) {
             Console.clearScreen();
             System.out.println(chat.getID() + ". " + chat.getType() + " Chat - " + chat.getTitle());
             Console.printSeparator();
-            System.out.println("Members Count : " + chat.countMembers() + " Users");
-            System.out.println("Messages Count : " + chat.countMessages() + " Messages");
+            System.out.println("Members Count: " + chat.countMembers() + " Users");
+            System.out.println("Messages Count: " + chat.countMessages() + " Messages");
             Console.printSeparator();
-            System.out.println("Members : ");
-            for (ChatMember member : chat.getMembers())
-            {
+            System.out.println("Members:");
+            for (ChatMember member : chat.getMembers()) {
                 member.showMembers();
             }
 
@@ -48,49 +59,27 @@ public class ChatDetails {
             System.out.print("Choose an option: ");
             int choice = Console.NextInt(MainApp.scanner);
 
-            switch (choice) {
-                case 1:
-                    addMember();
-                    break;
+            if (choice == 0) return;
 
-                case 2:
-                    removeMember();
-                    break;
-
-                case 3:
-                    promoteAdmin();
-                    break;
-
-                case 4:
-                    demoteAdmin();
-                    break;
-
-                case 5:
-                    changeChatTitle();
-                    break ;
-
-                case 0:
-                    return;
-
-                default:
-                    System.out.println("Invalid option. Try again.");
-                    Console.sleep(1000);
+            Runnable action = menuActions.get(choice);
+            if (action != null) {
+                action.run();
+            } else {
+                System.out.println("Invalid option. Try again.");
+                Console.sleep(1000);
             }
         }
     }
-
 
     private void addMember() {
         Console.clearScreen();
         System.out.print("Enter username to add: ");
         String username = MainApp.scanner.nextLine();
-        User userToAdd;
         try {
-            userToAdd = MainApp.userManager.findUserByUsername(username);
+            User userToAdd = MainApp.userManager.findUserByUsername(username);
             MainApp.chatManager.addMember(chat, currentUser, userToAdd);
             System.out.println("User added successfully.");
-            chat.addMessage(new InfoMessage(currentUser, ActionType.ADDED,userToAdd));
-
+            chat.addMessage(new InfoMessage(currentUser, ActionType.ADDED, userToAdd));
         } catch (UserNotFoundException | UserAlreadyInChatException | NoPermissionException e) {
             System.out.println(e.getMessage());
         }
@@ -101,17 +90,14 @@ public class ChatDetails {
         Console.clearScreen();
         System.out.print("Enter username to remove: ");
         String username = MainApp.scanner.nextLine();
-        User userToRemove;
         try {
-            userToRemove  = MainApp.userManager.findUserByUsername(username);;
-            MainApp.chatManager.removeMember(chat, currentUser ,userToRemove);
+            User userToRemove = MainApp.userManager.findUserByUsername(username);
+            MainApp.chatManager.removeMember(chat, currentUser, userToRemove);
             System.out.println("User removed successfully.");
-            chat.addMessage(new InfoMessage(currentUser, ActionType.REMOVED,userToRemove));
-
+            chat.addMessage(new InfoMessage(currentUser, ActionType.REMOVED, userToRemove));
         } catch (UserNotFoundException | UserNotInChat | NoPermissionException e) {
             System.out.println(e.getMessage());
         }
-
         Console.sleep(1000);
     }
 
@@ -119,13 +105,12 @@ public class ChatDetails {
         Console.clearScreen();
         System.out.print("Enter username to promote: ");
         String username = MainApp.scanner.nextLine();
-        User userToPromote;
         try {
-            userToPromote = MainApp.userManager.findUserByUsername(username);
+            User userToPromote = MainApp.userManager.findUserByUsername(username);
             MainApp.chatManager.promoteToAdmin(chat, currentUser, userToPromote);
             System.out.println("User promoted to Admin.");
         } catch (UserNotFoundException | UserNotInChat | NoPermissionException e) {
-            System.out.println(e.getMessage());   
+            System.out.println(e.getMessage());
         }
         Console.sleep(1000);
     }
@@ -134,13 +119,12 @@ public class ChatDetails {
         Console.clearScreen();
         System.out.print("Enter username to demote: ");
         String username = MainApp.scanner.nextLine();
-        User userToDemote;
         try {
-            userToDemote = MainApp.userManager.findUserByUsername(username);
+            User userToDemote = MainApp.userManager.findUserByUsername(username);
             MainApp.chatManager.demoteFromAdmin(chat, currentUser, userToDemote);
             System.out.println("User demoted from Admin.");
         } catch (UserNotFoundException | UserNotInChat | NoPermissionException e) {
-        System.out.println(e.getMessage());
+            System.out.println(e.getMessage());
         }
         Console.sleep(1000);
     }
@@ -156,7 +140,6 @@ public class ChatDetails {
         } catch (NoPermissionException e) {
             System.out.println(e.getMessage());
         }
-        
         Console.sleep(1000);
     }
 }

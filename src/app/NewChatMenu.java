@@ -1,5 +1,7 @@
 package app;
 
+import java.util.HashMap;
+import java.util.Map;
 import models.chat.*;
 import models.exception.NoPermissionException;
 import models.exception.UserNotFoundException;
@@ -9,9 +11,17 @@ import util.Console;
 
 public class NewChatMenu {
     private User user;
+    private final Map<Integer, Runnable> menuActions = new HashMap<>();
 
     public NewChatMenu(User user) {
         this.user = user;
+        initializeMenuActions();
+    }
+
+    private void initializeMenuActions() {
+        menuActions.put(1, this::createPrivateChat);
+        menuActions.put(2, this::createGroupChat);
+        menuActions.put(3, this::createChannel);
     }
 
     public void show() {
@@ -26,26 +36,14 @@ public class NewChatMenu {
             Console.printSeparator();
             System.out.print("Choose an option: ");
             int choice = Console.NextInt(MainApp.scanner);
-
-            switch (choice) {
-                case 1:
-                    createPrivateChat();
-                    break;
-
-                case 2:
-                    createGroupChat();
-                    break;
-
-                case 3:
-                    createChannel();
-                    break;
-
-                case 0:
-                    return;
-
-                default:
-                    System.out.println("Invalid option. Try again.");
-                    Console.sleep(1000);
+            if (choice == 0) return;
+            
+            Runnable action = menuActions.get(choice);
+            if (action != null) {
+                action.run();
+            } else {
+                System.out.println("Invalid option. Try again.");
+                Console.sleep(1000);
             }
         }
     }

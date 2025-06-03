@@ -1,5 +1,6 @@
 package models.message;
 
+import models.exception.NotEditableMessageException;
 import models.user.User;
 import util.DateTimeUtil;
 
@@ -24,4 +25,14 @@ public class InfoMessage extends Message{
         System.out.println("[INFO] " + Info);
     }
     
+    @Override
+    public boolean editable() {
+        return false;
+    }
+
+    @Override
+    public void edit(String newContent) throws NotEditableMessageException{
+        throw new NotEditableMessageException("InfoMessage");
+    }
+
 }
